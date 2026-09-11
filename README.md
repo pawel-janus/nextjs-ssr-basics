@@ -1,36 +1,176 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Weather Dashboard - Next.js SSR POC
+
+Simple weather application demonstrating **Server-Side Rendering (SSR)** with Next.js 16 App Router.
+
+## Overview
+
+This POC explores Next.js SSR fundamentals by building a real-time weather dashboard that fetches data server-side and renders complete HTML before sending to the browser.
+
+**Live data:** Current weather for Warsaw from [wttr.in](https://wttr.in) API
+
+## Tech Stack
+
+- **Next.js 16.3.4** - React framework with SSR
+- **React 19.2.8** - Server Components & Suspense
+- **TypeScript** - Type safety
+- **Tailwind CSS v4** - Styling with CSS-based config
+- **Turbopack** - Fast dev server (Rust-based)
+
+## Key Features
+
+### Server-Side Rendering (SSR)
+- Async Server Components fetch data on every request
+- HTML includes weather data before reaching browser
+- No client-side loading spinners for initial data
+- SEO-friendly (complete HTML in page source)
+
+### Suspense Boundaries
+- Loading skeleton while fetching weather data
+- Progressive rendering - instant page shell, then content
+- Better perceived performance
+
+### Error Handling
+- Custom `error.tsx` boundary catches fetch failures
+- Retry button for network errors
+- Graceful degradation
+
+### Dark Mode
+- Automatic based on system preference (`prefers-color-scheme`)
+- CSS variables + Tailwind dark mode classes
+- No JavaScript required
+
+## Project Structure
+
+```
+app/
+  layout.tsx       # Root layout, fonts, metadata
+  page.tsx         # Weather Dashboard (SSR)
+  error.tsx        # Error boundary with retry
+  globals.css      # Tailwind + theme config
+public/            # Static assets
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 20+
+- npm
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Run dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Verify SSR
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Open the page in browser
+2. Right-click → "View Page Source"
+3. Search for temperature value (e.g., "15°C")
+4. ✅ Data is in HTML source = Server-Side Rendered!
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+### Server Component (async)
+```tsx
+async function WeatherData() {
+  const res = await fetch('https://wttr.in/Warsaw?format=j1', {
+    cache: 'no-store' // Always fresh data (SSR)
+  });
+  
+  const data = await res.json();
+  return <div>{data.current_condition[0].temp_C}°C</div>;
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Suspense Boundary
+```tsx
+<Suspense fallback={<LoadingSkeleton />}>
+  <WeatherData />
+</Suspense>
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Flow:**
+1. Request → Next.js server
+2. Server executes `await fetch()`
+3. Server renders HTML with real data
+4. Server sends complete HTML to browser
+5. Browser displays instantly (no loading)
 
-## Deploy on Vercel
+## What I Learned
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Next.js 16 Features
+- **App Router** - file-based routing (`app/page.tsx` → `/`)
+- **Server Components** - async/await in components (game changer!)
+- **Suspense** - built-in loading states
+- **Error boundaries** - `error.tsx` auto-wraps pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### SSR vs CSR
+| | SSR (this POC) | CSR (traditional React) |
+|---|---|---|
+| **First paint** | Instant (HTML ready) | Blank (wait for JS) |
+| **SEO** | Excellent (full HTML) | Poor (empty div) |
+| **Data fetching** | Server-side | Client-side (useEffect) |
+| **Loading state** | Suspense fallback | Manual useState |
+
+### Tailwind v4 Changes
+- Config in CSS (`@theme inline`) not `tailwind.config.js`
+- Faster hot reload (CSS only, no JS rebuild)
+- CSS variables for design tokens
+
+### Next.js Conventions
+- `layout.tsx` - wraps all pages (fonts, metadata)
+- `page.tsx` - route endpoint (`export default function`)
+- `error.tsx` - auto error boundary
+- `loading.tsx` - auto Suspense fallback (not used here, manual Suspense instead)
+
+## Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+## Deployment
+
+**Local tested** ✅  
+**Cloud Run** - Not yet deployed (Phase 4)
+
+Dockerfile and Cloud Run deployment will be added in future iteration.
+
+## Commits
+
+Clean git history documenting each step:
+- `Initial commit from Create Next App` - Project scaffolding
+- `Add Weather Dashboard with SSR` - Core implementation
+
+## Future Enhancements
+
+- [ ] Multi-city support (dropdown selector)
+- [ ] Weather icons from wttr.in
+- [ ] 7-day forecast
+- [ ] Docker + Cloud Run deployment
+- [ ] CI/CD with GitHub Actions
+
+## Part of React/Next.js POC Series
+
+This is POC #1 in a series exploring React and Next.js patterns:
+1. **Next.js SSR Basics** ← You are here
+2. Next.js Client Components & Hydration
+3. Next.js API Routes
+4. Next.js + Database Integration
+5. Next.js + Authentication
+6. ISR/SSG Strategies
+7. React Server Actions
+
+---
+
+**Learning focus:** Server-Side Rendering fundamentals  
+**Status:** ✅ Core implementation complete  
+**Next:** Cloud Run deployment or new POC
