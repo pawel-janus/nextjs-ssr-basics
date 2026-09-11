@@ -144,18 +144,36 @@ npm run build
 npm start
 ```
 
+## Docker Build
+
+Multi-stage Dockerfile optimized for Cloud Run:
+
+```bash
+docker build -t nextjs-weather:latest .
+docker run -p 3000:3000 nextjs-weather:latest
+```
+
+**Features:**
+- Multi-stage build (deps → builder → runner)
+- `output: 'standalone'` for minimal image size
+- node:20-alpine base (small footprint)
+- Non-root user for security
+- Optimized layer caching
+
 ## Deployment
 
 **Local tested** ✅  
-**Cloud Run** - Not yet deployed (Phase 4)
-
-Dockerfile and Cloud Run deployment will be added in future iteration.
+**Docker ready** ✅  
+**Cloud Run** - Ready for deployment (awaiting GCP setup)
 
 ## Commits
 
 Clean git history documenting each step:
 - `Initial commit from Create Next App` - Project scaffolding
 - `Add Weather Dashboard with SSR` - Core implementation
+- `Add comprehensive documentation` - README with learnings
+- `Add weather icon from wttr.in API` - Visual enhancement
+- `Add Docker support for Cloud Run deployment` - Containerization
 
 ## Future Enhancements
 
