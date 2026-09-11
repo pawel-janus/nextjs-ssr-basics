@@ -17,9 +17,19 @@ async function WeatherData() {
 
   const current = data.current_condition[0];
 
+  const iconUrl = current.weatherIconUrl[0].value;
+
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8 min-w-[300px]">
       <div className="text-center">
+        <img
+          src={iconUrl}
+          alt={current.weatherDesc[0].value}
+          width={64}
+          height={64}
+          loading="lazy"
+          className="mx-auto mb-4"
+        />
         <div className="text-6xl font-bold text-foreground mb-2">
           {current.temp_C}°C
         </div>

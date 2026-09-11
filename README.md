@@ -6,7 +6,7 @@ Simple weather application demonstrating **Server-Side Rendering (SSR)** with Ne
 
 This POC explores Next.js SSR fundamentals by building a real-time weather dashboard that fetches data server-side and renders complete HTML before sending to the browser.
 
-**Live data:** Current weather for Warsaw from [wttr.in](https://wttr.in) API
+**Live data:** Current weather for Warsaw from [wttr.in](https://wttr.in) API with weather icon
 
 ## Tech Stack
 
@@ -85,7 +85,14 @@ async function WeatherData() {
   });
   
   const data = await res.json();
-  return <div>{data.current_condition[0].temp_C}°C</div>;
+  const current = data.current_condition[0];
+  
+  return (
+    <div>
+      <img src={current.weatherIconUrl[0].value} alt={current.weatherDesc[0].value} />
+      <div>{current.temp_C}°C</div>
+    </div>
+  );
 }
 ```
 
@@ -153,7 +160,6 @@ Clean git history documenting each step:
 ## Future Enhancements
 
 - [ ] Multi-city support (dropdown selector)
-- [ ] Weather icons from wttr.in
 - [ ] 7-day forecast
 - [ ] Docker + Cloud Run deployment
 - [ ] CI/CD with GitHub Actions
