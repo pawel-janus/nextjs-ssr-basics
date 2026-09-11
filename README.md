@@ -160,11 +160,70 @@ docker run -p 3000:3000 nextjs-weather:latest
 - Non-root user for security
 - Optimized layer caching
 
-## Deployment
+## Cloud Run Deployment
 
-**Local tested** ✅  
-**Docker ready** ✅  
-**Cloud Run** - Ready for deployment (awaiting GCP setup)
+### Prerequisites
+
+**GCP Setup:**
+```bash
+# 1. Create Artifact Registry repository (one-time setup for all Next.js POCs)
+gcloud artifacts repositories create nextjs-apps \
+  --repository-format=docker \
+  --location=europe-central2 \
+  --description="Docker images for Next.js POC applications"
+
+# 2. Create Service Account (one-time setup for all Next.js POCs)
+gcloud iam service-accounts create nextjs-apps-sa \
+  --display-name="Next.js Applications Service Account"
+```
+
+**Note:** These are shared resources for all Next.js POC applications.
+
+### Deploy to Cloud Run
+
+```bash
+# Set variables
+PROJECT_ID=your-gcp-project-id
+REGION=europe-central2
+
+# 1. Build Docker image with Cloud Build
+gcloud builds submit \
+  --tag ${REGION}-docker.pkg.dev/${PROJECT_ID}/nextjs-apps/weather-dashboard:latest
+
+# 2. Deploy to Cloud Run
+gcloud run deploy weather-dashboard \
+  --image=${REGION}-docker.pkg.dev/${PROJECT_ID}/nextjs-apps/weather-dashboard:latest \
+  --platform=managed \
+  --region=${REGION} \
+  --service-account=nextjs-apps-sa@${PROJECT_ID}.iam.gserviceaccount.com \
+  --allow-unauthenticated \
+  --port=3000 \
+  --memory=512Mi \
+  --cpu=1 \
+  --min-instances=0 \
+  --max-instances=10
+```
+
+### Get Service URL
+
+After deployment, get your service URL:
+
+```bash
+gcloud run services describe weather-dashboard \
+  --region=europe-central2 \
+  --format='value(status.url)'
+```
+
+### Verify SSR in Production
+
+```bash
+# Fetch HTML and check if weather data is in the source
+curl -s $(gcloud run services describe weather-dashboard \
+  --region=europe-central2 \
+  --format='value(status.url)') | grep "°C"
+```
+
+If you see temperature in the output → SSR works! ✅
 
 ## Commits
 
