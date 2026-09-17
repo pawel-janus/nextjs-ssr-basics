@@ -184,8 +184,8 @@ gcloud iam service-accounts create nextjs-apps-sa \
 
 ```bash
 # Set variables
-PROJECT_ID=your-gcp-project-id
-REGION=europe-central2
+PROJECT_ID=YOUR_PROJECT_ID
+REGION=YOUR_REGION  # e.g., europe-central2, us-central1
 
 # 1. Build Docker image with Cloud Build
 gcloud builds submit \
@@ -211,7 +211,7 @@ After deployment, get your service URL:
 
 ```bash
 gcloud run services describe weather-dashboard \
-  --region=europe-central2 \
+  --region=${REGION} \
   --format='value(status.url)'
 ```
 
@@ -220,7 +220,7 @@ gcloud run services describe weather-dashboard \
 ```bash
 # Fetch HTML and check if weather data is in the source
 curl -s $(gcloud run services describe weather-dashboard \
-  --region=europe-central2 \
+  --region=${REGION} \
   --format='value(status.url)') | grep "°C"
 ```
 
